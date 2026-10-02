@@ -1,0 +1,87 @@
+.section {
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  background: var(--c-card-bg);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--c-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.header:focus-visible {
+  outline: 2px solid var(--c-accent-secondary);
+  outline-offset: -2px;
+}
+
+.chevron {
+  color: var(--c-text-muted);
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.body {
+  padding: 0 12px 10px;
+  border-top: 1px solid var(--c-border);
+}
+
+.glowControls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 8px 8px 10px;
+  margin-left: 4px;
+  border-left: 3px solid var(--c-accent-primary);
+  border-radius: 0 8px 8px 0;
+  background: var(--c-surface);
+}
+
+.inlineTag {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-accent-secondary);
+}
+
+.controlRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.controlLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--c-text-primary);
+}
+
+.value {
+  font-size: 12px;
+  color: var(--c-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--c-accent-primary);
+  cursor: pointer;
+}

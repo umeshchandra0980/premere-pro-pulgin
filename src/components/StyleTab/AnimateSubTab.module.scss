@@ -1,0 +1,153 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segLabel {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+}
+
+.segBtn {
+  flex: 1;
+  padding: 7px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segBtnOn {
+  background: var(--c-accent-primary);
+  color: #fff;
+}
+
+.entrance {
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-accent-primary);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-accent-secondary);
+  margin-bottom: 8px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.curve {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background: #0a1020;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.curve svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.param {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.paramLabel {
+  width: 72px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--c-text-primary);
+}
+
+.range {
+  flex: 1;
+  accent-color: var(--c-accent-primary);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.num {
+  width: 56px;
+  flex-shrink: 0;
+  padding: 5px 4px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+  font-size: 10px;
+  text-align: center;
+}
+
+.hint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--c-text-muted);
+  line-height: 1.35;
+}
+
+.presetList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.presetBtn {
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background: var(--c-card-bg);
+  color: var(--c-text-primary);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.presetBtnOn {
+  border-color: var(--c-accent-primary);
+  box-shadow: inset 0 0 0 1px var(--c-accent-primary);
+}
+
+.presetBtn small {
+  display: block;
+  color: var(--c-text-muted);
+  font-size: 10px;
+  margin-top: 2px;
+}

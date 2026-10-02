@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoCaption — Captions · Style (TypeMotion) · Templates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0B0F1A; --surface: #131A2A; --card: #1B2436; --border: #2A3549;
+      --accent: #3B82F6; --accent2: #60A5FA; --teal: #22D3AA;
+      --text: #E8ECF4; --muted: #8B96AD;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; gap: 18px;
+      padding: 20px; font-family: "DM Sans", system-ui, sans-serif; color: var(--text);
+      background: radial-gradient(ellipse at 20% 0%, rgba(59,130,246,.16), transparent 50%), #06080f;
+    }
+    .panel {
+      width: 380px; height: 860px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+    }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-size: 14px; font-weight: 700; }
+    .btn {
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      border-radius: 7px; padding: 7px 12px; font: 600 12px "DM Sans", sans-serif; cursor: pointer;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    .video {
+      display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .thumbs { display: flex; gap: 3px; flex: 1; }
+    .thumb { width: 28px; height: 18px; border-radius: 3px; border: 1px solid var(--border); background: linear-gradient(135deg,#1B2436,#2A3549); }
+    .thumb.on { border-color: var(--accent); }
+    .icon { width: 26px; height: 26px; border: none; border-radius: 5px; background: transparent; color: var(--text); cursor: pointer; }
+    .tc { font: 500 10px "JetBrains Mono", monospace; color: var(--muted); min-width: 86px; text-align: center; }
+
+    /* MAIN: AutoCaptions | Style | Templates */
+    .main-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .mtab {
+      flex: 1; padding: 11px 4px; border: none; border-bottom: 2px solid transparent;
+      background: transparent; color: var(--muted); font: 600 12px "DM Sans", sans-serif; cursor: pointer;
+    }
+    .mtab.on { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .body { flex: 1; min-height: 0; }
+    .mpane { display: none; height: 100%; flex-direction: column; overflow: hidden; }
+    .mpane.on { display: flex; }
+    .scroll { flex: 1; overflow-y: auto; padding: 12px; }
+    .scroll::-webkit-scrollbar { width: 5px; }
+    .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    select, input[type=number], input[type=text] {
+      width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--card); color: var(--text); font: 400 13px "DM Sans", sans-serif; margin-bottom: 10px;
+    }
+    .row3 { display: flex; gap: 8px; }
+    .row3 > div { flex: 1; min-width: 0; }
+    .fl { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; }
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    input[type=range] { flex: 1; width: 100%; accent-color: var(--accent); cursor: pointer; }
+    .val { font: 600 11px "JetBrains Mono", monospace; color: var(--accent2); min-width: 46px; text-align: right; }
+    .toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .toggle:last-child { border-bottom: none; }
+    .toggle p { font-size: 13px; font-weight: 500; }
+    .toggle span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+    .switch {
+      width: 38px; height: 20px; border-radius: 10px; border: 1px solid var(--border);
+      background: #0e1420; position: relative; cursor: pointer; flex-shrink: 0;
+    }
+    .switch.on { background: var(--accent); border-color: var(--accent); }
+    .switch i { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: .15s; }
+    .switch.on i { transform: translateX(18px); }
+    .cap { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+    .cap-meta { font: 500 10px "JetBrains Mono", monospace; color: var(--muted); margin-bottom: 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip { padding: 3px 8px; border-radius: 999px; font-size: 12px; background: var(--surface); border: 1px solid var(--border); }
+    .chip.on { background: var(--teal); border-color: var(--teal); color: var(--bg); font-weight: 700; }
+
+    /* ===== STYLE TAB: top black LIVE PREVIEW (big TypeMotion text) ===== */
+    .tm-preview {
+      background: #000; min-height: 88px; display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid var(--border); position: relative; overflow: hidden; flex-shrink: 0;
+      cursor: default;
+    }
+    .tm-preview.checker {
+      background-color: #111;
+      background-image:
+        linear-gradient(45deg,#222 25%,transparent 25%),
+        linear-gradient(-45deg,#222 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#222 75%),
+        linear-gradient(-45deg,transparent 75%,#222 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+    }
+    .tm-preview .live {
+      font-size: 28px; font-weight: 700; color: #fff; letter-spacing: 0;
+      text-align: center; padding: 12px 16px; max-width: 95%; line-height: 1.15;
+      user-select: none;
+    }
+    .tm-preview .live .u { display: inline-block; }
+
+    .tm-top {
+      padding: 8px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .tm-top .toggles { display: flex; flex-direction: column; gap: 0; margin-bottom: 8px; }
+    .tm-top .toggles .toggle { padding: 5px 0; }
+    .tm-top .toggles p { font-size: 12px; }
+    .your-text-row {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+    }
+    .your-text-row input {
+      flex: 1; margin: 0; padding: 0; border: none; background: transparent;
+      font: 600 14px "DM Sans", sans-serif; color: var(--text); outline: none;
+    }
+    .your-text-row .pencil { color: var(--muted); font-size: 12px; }
+    .badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .05em; padding: 3px 7px; border-radius: 999px;
+      color: var(--accent2); background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.35);
+      white-space: nowrap;
+    }
+
+    .pills {
+      display: flex; gap: 4px; margin: 10px 12px 0; padding: 3px; flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    }
+    .pill {
+      flex: 1; padding: 8px 6px; border: none; border-radius: 999px;
+      background: transparent; color: var(--muted); font: 600 12px "DM Sans", sans-serif; cursor: pointer;
+    }
+    .pill.on { background: var(--accent); color: #fff; }
+
+    .style-scroll { flex: 1; overflow-y: auto; padding: 12px; min-height: 0; }
+    .style-scroll::-webkit-scrollbar { width: 5px; }
+    .style-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .seg-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .seg { display: flex; gap: 3px; padding: 3px; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+    .seg button { flex: 1; padding: 7px; border: none; border-radius: 6px; background: transparent; color: var(--muted); font: 600 11px "DM Sans", sans-serif; cursor: pointer; }
+    .seg button.on { background: var(--accent); color: #fff; }
+
+    .entrance {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 12px; border-left: 3px solid var(--accent);
+    }
+    .entrance > .title { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
+    .curve { height: 52px; border-radius: 8px; border: 1px solid var(--border); background: #0a1020; margin: 8px 0 12px; }
+    .curve svg { width: 100%; height: 100%; display: block; }
+    .param { display: grid; grid-template-columns: 78px 1fr 58px; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .param label { font-size: 12px; }
+    .param .num { width: 58px; margin: 0; padding: 5px 3px; font-size: 10px; text-align: center; }
+    .dir-wrap { display: flex; align-items: center; gap: 6px; }
+    .dir-dial {
+      width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--accent2); flex-shrink: 0; background: var(--surface);
+    }
+    .dir-dial small { font-size: 7px; color: var(--muted); line-height: 1; margin-top: 1px; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* MAIN STYLE vs INLINE (nested under Glow) */
+    .style-block {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; margin-bottom: 12px;
+    }
+    .style-block .block-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .swatch-bar {
+      height: 28px; border-radius: 6px; border: 1px solid var(--border);
+      position: relative; overflow: hidden; margin-top: 4px;
+    }
+    .swatch-bar input { opacity: 0; position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+
+    /* INLINE styles — nested under Glow when ON (different from main Style) */
+    .inline-styles {
+      margin-top: 8px; padding: 10px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+    }
+    .inline-styles .inline-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: 8px;
+    }
+    .inline-styles .param { grid-template-columns: 70px 1fr 54px; }
+
+    .preset-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .preset-grid button {
+      width: calc(50% - 4px); padding: 8px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--card); color: var(--text); cursor: pointer; text-align: left; font-family: inherit;
+    }
+    .preset-grid button.on, .preset-grid button:hover { border-color: var(--accent); }
+    .pprev {
+      height: 52px; border-radius: 6px; margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.4);
+    }
+
+    .style-footer {
+      padding: 10px 12px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0;
+    }
+    .style-footer .row { display: flex; gap: 8px; }
+    .style-footer .btn { flex: 1; padding: 11px 8px; font-weight: 700; }
+    .status { margin-top: 8px; font-size: 11px; color: var(--muted); }
+    .status.ok { color: var(--teal); font-weight: 600; }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .chip-f { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font: 500 11px "DM Sans", sans-serif; cursor: pointer; }
+    .chip-f.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .grid2 { display: flex; flex-wrap: wrap; gap: 8px; }
+    .grid2 > * { width: calc(50% - 4px); }
+    .tpl { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+    .tpl.applied { border-color: var(--teal); }
+    .tpl-prev { height: 64px; border-radius: 6px; position: relative; overflow: hidden; margin-bottom: 8px; }
+    .tpl-ov { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.55); opacity: 0; }
+    .tpl:hover .tpl-ov { opacity: 1; }
+    .applied-badge { font-size: 10px; font-weight: 700; color: var(--teal); }
+
+    .side {
+      width: 240px; background: rgba(19,26,42,.95); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.45;
+    }
+    .side h3 { color: var(--text); font-size: 13px; margin-bottom: 8px; }
+    .side li { margin: 5px 0 5px 14px; }
+    .side .ok { color: var(--teal); }
+    .toast {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--accent); padding: 10px 16px;
+      border-radius: 8px; font-size: 13px; opacity: 0; transition: .2s; z-index: 50;
+    }
+    .toast.on { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <header class="header">
+      <h1>AutoCaption</h1>
+      <button class="btn" type="button" id="exportBtn">Export</button>
+    </header>
+
+    <div class="video">
+      <div class="thumbs" id="thumbs"></div>
+      <button class="icon" type="button" id="playBtn">▶</button>
+      <button class="icon" type="button" id="muteBtn">🔊</button>
+      <span class="tc" id="tc">00:00:00 / 00:12:00</span>
+      <button class="icon" type="button">⛶</button>
+    </div>
+
+    <div class="main-tabs">
+      <button class="mtab on" data-main="captions" type="button">AutoCaptions</button>
+      <button class="mtab" data-main="style" type="button">Style</button>
+      <button class="mtab" data-main="templates" type="button">Templates</button>
+    </div>
+
+    <div class="body">
+      <!-- AUTOCAPTIONS -->
+      <div class="mpane on" id="main-captions">
+        <div class="scroll">
+          <p class="label">Language</p>
+          <select><option>English</option><option>Hindi</option><option>Hindi+English</option></select>
+          <div class="row3">
+            <div><span class="fl">Words</span><select><option>Default</option><option>Auto</option></select></div>
+            <div><span class="fl">Lines</span><select><option>1</option><option selected>2</option><option>3</option></select></div>
+            <div><span class="fl">Characters</span><input type="number" value="42" /></div>
+          </div>
+          <div class="card">
+            <p class="label" style="margin-bottom:8px">Delay</p>
+            <div class="slider-row">
+              <input type="range" id="delay" min="-2000" max="2000" step="100" value="0" />
+              <span class="val" id="delayVal">0.0s</span>
+            </div>
+          </div>
+          <div class="card" id="capToggles"></div>
+          <p class="label">Captions</p>
+          <div id="caps"></div>
+        </div>
+      </div>
+
+      <!-- STYLE = TypeMotion layout -->
+      <div class="mpane" id="main-style">
+        <!-- TOP BLACK PREVIEW WINDOW — big animated TypeMotion text -->
+        <div class="tm-preview" id="tmPreview" title="Live style + animation preview">
+          <div class="live" id="liveText"></div>
+        </div>
+
+        <div class="tm-top">
+          <div class="toggles">
+            <div class="toggle"><div><p>Pause on hover</p></div><button type="button" class="switch on" id="pauseHover"><i></i></button></div>
+            <div class="toggle"><div><p>Checkerboard</p></div><button type="button" class="switch" id="checker"><i></i></button></div>
+          </div>
+          <div class="your-text-row">
+            <input id="styleName" value="TypeMotion" spellcheck="false" />
+            <span class="pencil">✎</span>
+            <span class="badge">YOUR TEXT</span>
+          </div>
+        </div>
+
+        <!-- Animate | Style | Presets (INSIDE main Style tab) -->
+        <div class="pills" id="stylePills">
+          <button class="pill on" data-sub="animate" type="button">Animate</button>
+          <button class="pill" data-sub="style" type="button">Style</button>
+          <button class="pill" data-sub="presets" type="button">Presets</button>
+        </div>
+
+        <div class="style-scroll">
+          <!-- ANIMATE -->
+          <div id="sub-animate">
+            <p class="seg-label">Animate by</p>
+            <div class="seg" id="animateBy">
+              <button type="button" class="on" data-v="letters">Letters</button>
+              <button type="button" data-v="words">Words</button>
+              <button type="button" data-v="lines">Lines</button>
+            </div>
+
+            <div class="entrance">
+              <div class="title">Entrance</div>
+              <select id="ease">
+                <option>Elastic</option><option>Ease Out</option><option>Ease In Out</option><option>Bounce</option><option>Linear</option>
+              </select>
+              <div class="curve">
+                <svg viewBox="0 0 200 52" preserveAspectRatio="none">
+                  <path id="curvePath" d="M0,44 C40,44 55,6 95,18 C130,28 155,4 200,4" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
+                </svg>
+              </div>
+              <div class="param"><label>Bounciness</label><input type="range" id="bounciness" min="0" max="100" value="20" /><input class="num" id="bouncinessN" value="20" /></div>
+              <div class="param"><label>Duration</label><input type="range" id="duration" min="0.1" max="3" step="0.1" value="1.2" /><input class="num" id="durationN" value="1.2 s" /></div>
+              <div class="param"><label>Overlap</label><input type="range" id="overlap" min="0" max="100" value="60" /><input class="num" id="overlapN" value="60%" /></div>
+              <div class="param">
+                <label>Direction</label>
+                <div class="dir-wrap">
+                  <div class="dir-dial" id="dirDial">↑<small>below</small></div>
+                  <input type="range" id="direction" min="0" max="360" value="0" />
+                </div>
+                <input class="num" id="directionN" value="0°" />
+              </div>
+              <div class="param"><label>Distance</label><input type="range" id="distance" min="0" max="300" value="120" /><input class="num" id="distanceN" value="120 px" /></div>
+            </div>
+
+            <div class="entrance" style="border-left-color: var(--border)">
+              <div class="title" style="color: var(--muted)">Exit</div>
+              <div class="seg" id="exitMode">
+                <button type="button" data-v="mirror">Mirror</button>
+                <button type="button" class="on" data-v="clone">Clone</button>
+                <button type="button" data-v="custom">Custom</button>
+              </div>
+              <div class="param"><label>Duration</label><input type="range" id="exitDur" min="0.1" max="2" step="0.1" value="0.6" /><input class="num" id="exitDurN" value="0.6 s" /></div>
+              <p class="hint" id="exitHint">Exit copies the entrance exactly (not reversed).</p>
+            </div>
+          </div>
+
+          <!-- STYLE: main sections vs INLINE under Glow -->
+          <div id="sub-style" style="display:none">
+            <div class="style-block">
+              <div class="block-title">Stroke · main style</div>
+              <div class="param"><label>Width</label><input type="range" id="strokeW" min="0" max="12" value="0" /><input class="num" id="strokeWN" value="0 px" /></div>
+              <p class="fl">Color</p>
+              <div class="swatch-bar" id="strokeSw" style="background:#000"><input type="color" id="strokeC" value="#000000" /></div>
+            </div>
+
+            <div class="style-block">
+              <div class="block-title">Effects · main style</div>
+              <div class="toggle"><div><p>Gradient</p></div><button type="button" class="switch" id="gradSw"><i></i></button></div>
+              <div class="toggle"><div><p>Glow</p></div><button type="button" class="switch on" id="glowSw"><i></i></button></div>
+
+              <!-- INLINE styles — only when Glow is ON (nested, not same as main Style) -->
+              <div class="inline-styles" id="glowInline">
+                <div class="inline-tag">Inline · Glow</div>
+                <p class="fl">Color</p>
+                <div class="swatch-bar" id="glowSwatch" style="background:#ffffff;margin-bottom:10px"><input type="color" id="glowC" value="#ffffff" /></div>
+                <div class="param"><label>Size</label><input type="range" id="glowSize" min="0" max="80" value="20" /><input class="num" id="glowSizeN" value="20 px" /></div>
+                <div class="param"><label>Intensity</label><input type="range" id="glowInt" min="0" max="100" value="40" /><input class="num" id="glowIntN" value="40%" /></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRESETS -->
+          <div id="sub-presets" style="display:none">
+            <p class="seg-label" style="margin-bottom:10px">Presets</p>
+            <div class="preset-grid" id="presetGrid"></div>
+          </div>
+        </div>
+
+        <div class="style-footer">
+          <div class="row">
+            <button class="btn btn-primary" type="button" id="applyBtn">Apply at Playhead</button>
+            <button class="btn" type="button" id="updateBtn">Update Selected</button>
+          </div>
+          <div class="status" id="status">Ready.</div>
+        </div>
+      </div>
+
+      <!-- TEMPLATES -->
+      <div class="mpane" id="main-templates">
+        <div class="scroll">
+          <div class="filters" id="filters"></div>
+          <div class="grid2" id="tplGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="side">
+    <h3>How Style preview works</h3>
+    <ul>
+      <li class="ok">Top black area = live TypeMotion text</li>
+      <li class="ok">Animate / Style / Presets are sub-tabs</li>
+      <li class="ok">Main Style = Stroke + Effects toggles</li>
+      <li class="ok">Inline = Glow Color / Size / Intensity (nested)</li>
+      <li class="ok">Apply → plays on that preview + “@ track 1”</li>
+    </ul>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+    const toast = (m) => {
+      const t = $("toast"); t.textContent = m; t.classList.add("on");
+      clearTimeout(t._x); t._x = setTimeout(() => t.classList.remove("on"), 1600);
+    };
+
+    const S = {
+      text: "TypeMotion", animateBy: "letters", ease: "Elastic",
+      bounciness: 20, duration: 1.2, overlap: 60, direction: 0, distance: 120,
+      exitMode: "clone", exitDur: 0.6,
+      strokeW: 0, strokeC: "#000000", gradient: false,
+      glow: true, glowC: "#ffffff", glowSize: 20, glowInt: 40,
+      pauseHover: true, applied: false,
+      play: false, t: 0, dur: 12, muted: false,
+    };
+
+    /* Main tabs */
+    $$(".mtab").forEach((btn) => {
+      btn.onclick = () => {
+        $$(".mtab").forEach((b) => b.classList.toggle("on", b === btn));
+        $$(".mpane").forEach((p) => p.classList.toggle("on", p.id === "main-" + btn.dataset.main));
+        if (btn.dataset.main === "style") playPreview(false);
+      };
+    });
+
+    /* Video */
+    for (let i = 0; i < 6; i++) {
+      const d = document.createElement("div");
+      d.className = "thumb" + (i === 0 ? " on" : "");
+      $("thumbs").appendChild(d);
+    }
+    const fmt = (s) => {
+      const m = Math.floor(s / 60), sec = Math.floor(s % 60), f = Math.floor((s % 1) * 30);
+      return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}:${String(f).padStart(2,"0")}`;
+    };
+    setInterval(() => {
+      if (!S.play) return;
+      S.t += 0.1;
+      if (S.t >= S.dur) { S.t = S.dur; S.play = false; $("playBtn").textContent = "▶"; }
+      $("tc").textContent = `${fmt(S.t)} / ${fmt(S.dur)}`;
+      const idx = Math.min(5, Math.floor((S.t / S.dur) * 6));
+      $$(".thumb").forEach((el, i) => el.classList.toggle("on", i === idx));
+      $$(".chip").forEach((ch) => ch.classList.toggle("on", S.t >= +ch.dataset.a && S.t < +ch.dataset.b));
+    }, 100);
+    $("playBtn").onclick = () => {
+      if (!S.play && S.t >= S.dur) S.t = 0;
+      S.play = !S.play; $("playBtn").textContent = S.play ? "❚❚" : "▶";
+    };
+    $("muteBtn").onclick = () => { S.muted = !S.muted; $("muteBtn").textContent = S.muted ? "🔇" : "🔊"; };
+
+    /* Captions */
+    $("delay").oninput = (e) => {
+      const v = Number(e.target.value) / 1000;
+      $("delayVal").textContent = (v > 0 ? "+" : "") + v.toFixed(1) + "s";
+    };
+    [["Remove punctuation","Strip commas & quotes"],["Remove gaps","Tighten silent gaps"],["Remove emphasis","Normalize ALL-CAPS"]]
+      .forEach(([t, d]) => {
+        const row = document.createElement("div");
+        row.className = "toggle";
+        row.innerHTML = `<div><p>${t}</p><span>${d}</span></div><button type="button" class="switch"><i></i></button>`;
+        row.querySelector(".switch").onclick = function () { this.classList.toggle("on"); };
+        $("capToggles").appendChild(row);
+      });
+    [
+      { s: 0, e: 2.4, w: [["Welcome",0,.45],["to",.45,.65],["AutoCaption",.65,1.4],["Premiere",1.4,2.4]] },
+      { s: 2.5, e: 5, w: [["Edit",2.5,2.9],["style,",2.9,3.5],["export",3.5,4.2],["easily.",4.2,5]] },
+    ].forEach((c) => {
+      const el = document.createElement("div");
+      el.className = "cap";
+      el.innerHTML = `<div class="cap-meta">${c.s.toFixed(1)}s – ${c.e.toFixed(1)}s</div><div class="chips"></div>`;
+      c.w.forEach(([text, a, b]) => {
+        const s = document.createElement("span");
+        s.className = "chip"; s.dataset.a = a; s.dataset.b = b; s.textContent = text;
+        el.querySelector(".chips").appendChild(s);
+      });
+      $("caps").appendChild(el);
+    });
+
+    /* Style sub-tabs */
+    $$("#stylePills .pill").forEach((btn) => {
+      btn.onclick = () => {
+        $$("#stylePills .pill").forEach((b) => b.classList.toggle("on", b === btn));
+        ["animate", "style", "presets"].forEach((id) => {
+          $("sub-" + id).style.display = btn.dataset.sub === id ? "block" : "none";
+        });
+      };
+    });
+
+    /* Switches */
+    $("pauseHover").onclick = function () {
+      this.classList.toggle("on");
+      S.pauseHover = this.classList.contains("on");
+    };
+    $("checker").onclick = function () {
+      this.classList.toggle("on");
+      $("tmPreview").classList.toggle("checker", this.classList.contains("on"));
+    };
+    $("gradSw").onclick = function () {
+      this.classList.toggle("on");
+      S.gradient = this.classList.contains("on");
+      applyLook();
+    };
+    $("glowSw").onclick = function () {
+      this.classList.toggle("on");
+      S.glow = this.classList.contains("on");
+      $("glowInline").style.display = S.glow ? "block" : "none";
+      applyLook();
+    };
+
+    /* Pause animation on hover if enabled */
+    $("tmPreview").onmouseenter = () => {
+      if (S.pauseHover) $("liveText").style.animationPlayState = "paused";
+      [...$("liveText").querySelectorAll(".u")].forEach((u) => { u.style.transitionPlayState = "paused"; });
+    };
+    $("tmPreview").onmouseleave = () => {
+      [...$("liveText").querySelectorAll(".u")].forEach((u) => { u.style.transitionPlayState = "running"; });
+    };
+
+    const CURVES = {
+      Elastic: "M0,44 C40,44 55,6 95,18 C130,28 155,4 200,4",
+      "Ease Out": "M0,44 C80,44 120,6 200,4",
+      "Ease In Out": "M0,44 C50,44 50,4 200,4",
+      Bounce: "M0,44 C30,44 40,8 70,14 C100,6 130,10 160,4 200,4",
+      Linear: "M0,44 L200,4",
+    };
+    $("ease").onchange = (e) => {
+      S.ease = e.target.value;
+      $("curvePath").setAttribute("d", CURVES[S.ease] || CURVES.Elastic);
+      playPreview(true);
+    };
+
+    function wireSeg(id, key, cb) {
+      $(id).querySelectorAll("button").forEach((b) => {
+        b.onclick = () => {
+          $(id).querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+          b.classList.add("on");
+          S[key] = b.dataset.v;
+          cb && cb();
+          if (key === "animateBy") playPreview(true);
+        };
+      });
+    }
+    wireSeg("animateBy", "animateBy");
+    wireSeg("exitMode", "exitMode", () => {
+      $("exitHint").textContent = {
+        mirror: "Exit mirrors the entrance in reverse.",
+        clone: "Exit copies the entrance exactly (not reversed).",
+        custom: "Custom exit — tune duration independently.",
+      }[S.exitMode];
+    });
+
+    function bind(rid, nid, key, fmt, liveAnim) {
+      const r = $(rid), n = $(nid);
+      const sync = () => {
+        S[key] = +r.value;
+        n.value = fmt(S[key]);
+        if (key === "direction") {
+          const icons = ["↑","↖","←","↙","↓","↘","→","↗"];
+          $("dirDial").innerHTML = icons[Math.round(S.direction / 45) % 8] + "<small>below</small>";
+        }
+        applyLook();
+        if (liveAnim) playPreview(true);
+      };
+      r.oninput = sync;
+      n.onchange = () => {
+        const raw = parseFloat(String(n.value).replace(/[^\d.-]/g, ""));
+        if (!isNaN(raw)) { r.value = raw; sync(); }
+      };
+      sync();
+    }
+    bind("bounciness","bouncinessN","bounciness",(v)=>String(v), true);
+    bind("duration","durationN","duration",(v)=>v.toFixed(1)+" s", true);
+    bind("overlap","overlapN","overlap",(v)=>v+"%", true);
+    bind("direction","directionN","direction",(v)=>v+"°", true);
+    bind("distance","distanceN","distance",(v)=>v+" px", true);
+    bind("exitDur","exitDurN","exitDur",(v)=>v.toFixed(1)+" s", false);
+    bind("strokeW","strokeWN","strokeW",(v)=>v+" px", false);
+    bind("glowSize","glowSizeN","glowSize",(v)=>v+" px", false);
+    bind("glowInt","glowIntN","glowInt",(v)=>v+"%", false);
+
+    $("strokeC").oninput = (e) => { S.strokeC = e.target.value; $("strokeSw").style.background = e.target.value; applyLook(); };
+    $("glowC").oninput = (e) => { S.glowC = e.target.value; $("glowSwatch").style.background = e.target.value; applyLook(); };
+    $("styleName").oninput = (e) => {
+      S.text = e.target.value || "TypeMotion";
+      playPreview(false);
+    };
+
+    /* Presets */
+    [
+      { name: "Elastic Pop", color: "#3B82F6", bounciness: 40, distance: 140, glow: true, glowC: "#ffffff" },
+      { name: "Soft Fade", color: "#8B96AD", bounciness: 0, distance: 40, glow: false },
+      { name: "Neon Sweep", color: "#22D3AA", bounciness: 25, distance: 100, glow: true, glowC: "#22D3AA", glowSize: 28, glowInt: 70 },
+      { name: "Slide Bold", color: "#60A5FA", bounciness: 10, distance: 180, glow: false, strokeW: 2 },
+    ].forEach((p) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = `<div class="pprev" style="background:${p.color};text-shadow:0 0 12px ${p.glowC || p.color}">Aa</div><div style="font-size:12px;font-weight:600">${p.name}</div>`;
+      b.onclick = () => {
+        Object.assign(S, { glowSize: 20, glowInt: 40, strokeW: 0, glowC: "#ffffff" }, p);
+        $("styleName").value = p.name; S.text = p.name;
+        ["bounciness","distance","strokeW","glowSize","glowInt"].forEach((k) => {
+          if ($(k)) { $(k).value = S[k]; $(k).dispatchEvent(new Event("input")); }
+        });
+        $("glowSw").classList.toggle("on", !!S.glow);
+        $("glowInline").style.display = S.glow ? "block" : "none";
+        if (p.glowC) { $("glowC").value = p.glowC; $("glowSwatch").style.background = p.glowC; }
+        $$("#stylePills .pill").forEach((x) => x.classList.toggle("on", x.dataset.sub === "style"));
+        $("sub-animate").style.display = "none";
+        $("sub-presets").style.display = "none";
+        $("sub-style").style.display = "block";
+        applyLook();
+        playPreview(true);
+        toast("Preset → Style (main + inline glow)");
+      };
+      $("presetGrid").appendChild(b);
+    });
+
+    function applyLook() {
+      const el = $("liveText");
+      const alpha = Math.round(S.glowInt * 2.55).toString(16).padStart(2, "0");
+      el.style.textShadow = S.glow
+        ? `0 0 ${S.glowSize}px ${S.glowC}${alpha}, 0 0 ${S.glowSize * 2}px ${S.glowC}66`
+        : "none";
+      el.style.webkitTextStroke = S.strokeW > 0 ? `${S.strokeW}px ${S.strokeC}` : "0";
+      if (S.gradient) {
+        el.style.background = "linear-gradient(90deg,#60A5FA,#22D3AA)";
+        el.style.webkitBackgroundClip = "text";
+        el.style.color = "transparent";
+        el.style.webkitTextFillColor = "transparent";
+      } else {
+        el.style.background = "none";
+        el.style.color = "#fff";
+        el.style.webkitTextFillColor = "#fff";
+      }
+    }
+
+    let animTimer = null;
+    function playPreview(animate) {
+      const el = $("liveText");
+      el.innerHTML = "";
+      const units = S.animateBy === "letters" ? [...S.text]
+        : S.animateBy === "words" ? S.text.split(/(\s+)/) : [S.text];
+      units.forEach((u) => {
+        const span = document.createElement("span");
+        span.className = "u";
+        span.textContent = u === " " ? "\u00A0" : u;
+        el.appendChild(span);
+      });
+      applyLook();
+      if (!animate) {
+        [...el.querySelectorAll(".u")].forEach((s) => { s.style.opacity = "1"; s.style.transform = "none"; s.style.filter = "none"; });
+        return;
+      }
+      const letters = [...el.querySelectorAll(".u")];
+      const n = Math.max(letters.length, 1);
+      const step = S.duration * (1 - S.overlap / 100) / n;
+      const rad = (S.direction * Math.PI) / 180;
+      const dx = Math.sin(rad) * S.distance;
+      const dy = Math.cos(rad) * S.distance;
+      letters.forEach((span, i) => {
+        span.style.opacity = "0";
+        span.style.filter = "blur(8px)";
+        span.style.transform = `translate(${dx}px, ${dy}px)`;
+        span.style.transition = "none";
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          span.style.transition = `all ${S.duration}s cubic-bezier(.34,1.56,.64,1) ${i * step * 1000}ms`;
+          span.style.opacity = "1";
+          span.style.filter = "blur(0)";
+          span.style.transform = "translate(0,0)";
+        }));
+      });
+    }
+
+    $("applyBtn").onclick = () => {
+      S.applied = true;
+      playPreview(true);
+      $("status").textContent = `Applied ✓ ${S.text} @ track 1`;
+      $("status").classList.add("ok");
+      toast("Added to Premiere @ playhead (mock)");
+    };
+    $("updateBtn").onclick = () => {
+      if (!S.applied) {
+        $("status").textContent = "Nothing selected — apply first.";
+        $("status").classList.remove("ok");
+        return;
+      }
+      playPreview(true);
+      $("status").textContent = `Updated ✓ ${S.text} @ track 1`;
+      $("status").classList.add("ok");
+    };
+
+    /* Templates */
+    const filters = ["All","Minimal","Bold","Animated","Branded"];
+    let filter = "All", appliedTpl = null;
+    const tpls = [
+      { n: "Soft Minimal", c: "Minimal", col: "#2A3549" },
+      { n: "Bold Impact", c: "Bold", col: "#3B82F6" },
+      { n: "Kinetic Pop", c: "Animated", col: "#22D3AA" },
+      { n: "Brand Blue", c: "Branded", col: "#60A5FA" },
+      { n: "Quiet Line", c: "Minimal", col: "#8B96AD" },
+      { n: "Heavy Stack", c: "Bold", col: "#F26D6D" },
+    ];
+    filters.forEach((f) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip-f" + (f === "All" ? " on" : "");
+      b.textContent = f;
+      b.onclick = () => { filter = f; $$(".chip-f").forEach((x) => x.classList.toggle("on", x.textContent === f)); renderTpls(); };
+      $("filters").appendChild(b);
+    });
+    function renderTpls() {
+      $("tplGrid").innerHTML = "";
+      tpls.filter((t) => filter === "All" || t.c === filter).forEach((t) => {
+        const el = document.createElement("div");
+        el.className = "tpl" + (appliedTpl === t.n ? " applied" : "");
+        el.innerHTML = `<div class="tpl-prev" style="background:${t.col}"><div class="tpl-ov"><button class="btn btn-primary" type="button">Apply</button></div></div>
+          <div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:500">${t.n}</span>
+          ${appliedTpl === t.n ? '<span class="applied-badge">✓ Applied</span>' : ""}</div>`;
+        el.querySelector("button").onclick = () => {
+          appliedTpl = t.n; S.text = t.n; $("styleName").value = t.n;
+          renderTpls(); playPreview(true); toast("Template → open Style to animate");
+        };
+        $("tplGrid").appendChild(el);
+      });
+    }
+    renderTpls();
+
+    $("exportBtn").onclick = () => toast("Export modal (SRT / Burn-in)");
+
+    applyLook();
+    playPreview(false);
+  </script>
+</body>
+</html>

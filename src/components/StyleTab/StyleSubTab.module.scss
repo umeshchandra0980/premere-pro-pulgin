@@ -1,0 +1,71 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.toggles {
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  padding: 2px 12px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.strokeCard {
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.strokeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.widthField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.widthLabel {
+  font-size: 11px;
+  color: var(--c-text-muted);
+}
+
+.widthInput {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.widthInput:focus-visible {
+  outline: 2px solid var(--c-accent-secondary);
+  outline-offset: 1px;
+}
+
+.swatchGrow {
+  flex: 1;
+  min-width: 0;
+}

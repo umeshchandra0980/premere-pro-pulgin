@@ -1,0 +1,35 @@
+.wrap {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text-primary);
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.range {
+  flex: 1;
+  accent-color: var(--c-accent-primary);
+  cursor: pointer;
+}
+
+.value {
+  min-width: 48px;
+  text-align: right;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-accent-secondary);
+  font-weight: 600;
+}

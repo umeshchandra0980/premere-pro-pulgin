@@ -1,0 +1,256 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 220px;
+  overflow: hidden;
+  background: #070b14;
+}
+
+.filmGrain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 3px
+  );
+  z-index: 2;
+}
+
+.movieBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sky {
+  position: absolute;
+  inset: 0 0 35% 0;
+  background: linear-gradient(180deg, #1a2744 0%, #3d4f6e 55%, #6b7a8f 100%);
+}
+
+.horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  background: linear-gradient(180deg, #2a3344 0%, #121820 100%);
+}
+
+.subject {
+  position: absolute;
+  left: 18%;
+  bottom: 18%;
+  width: 28%;
+  height: 48%;
+  border-radius: 40% 40% 8% 8%;
+  background: linear-gradient(160deg, #4a5568 0%, #1e2430 70%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.captionLayer {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 14%;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.captionLine {
+  margin: 0;
+  text-align: center;
+  line-height: 1.25;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.word {
+  opacity: 0.45;
+  transition: opacity 0.12s ease, transform 0.12s ease, filter 0.12s ease;
+  display: inline-block;
+}
+
+.wordPast {
+  opacity: 0.85;
+}
+
+.wordActive {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+.anim_fade_in .wordActive {
+  animation: fadeIn 0.25s ease both;
+}
+
+.anim_typewriter .word {
+  opacity: 0;
+}
+
+.anim_typewriter .wordPast,
+.anim_typewriter .wordActive {
+  opacity: 1;
+}
+
+.anim_pop .wordActive {
+  animation: pop 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.anim_slide_up .wordActive {
+  animation: slideUp 0.28s ease both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.7);
+  }
+  70% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.idleHint {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(232, 236, 244, 0.55);
+  letter-spacing: 0.02em;
+}
+
+.stageMeta {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.stageMeta span {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(232, 236, 244, 0.7);
+  background: rgba(11, 15, 26, 0.55);
+  border: 1px solid rgba(42, 53, 73, 0.8);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 10px;
+}
+
+.thumbs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.thumb {
+  width: 36px;
+  height: 24px;
+  border-radius: 3px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  flex-shrink: 0;
+  opacity: 0.85;
+  padding: 0;
+  cursor: pointer;
+}
+
+.thumb:hover {
+  opacity: 1;
+}
+
+.thumbActive {
+  border-color: var(--c-accent-primary);
+  opacity: 1;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c-text-primary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  background: var(--c-card-bg);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--c-accent-secondary);
+  outline-offset: 2px;
+}
+
+.timecode {
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--c-text-muted);
+  min-width: 88px;
+  text-align: center;
+  user-select: none;
+}

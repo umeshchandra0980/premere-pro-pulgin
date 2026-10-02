@@ -80,10 +80,16 @@ const getTheme = (hostName: string) => {
 
 export const getColorScheme = async () => {
   const hostName =
-    uxp.host.name.toLowerCase().replace(/\s/g, "") || ("" as string);
+    uxp?.host?.name?.toLowerCase()?.replace(/\s/g, "") || ("browser" as string);
+
+  // Browser preview — skip Adobe theme APIs
+  if (hostName === "browser" || typeof (document as any).theme === "undefined") {
+    return { theme: "darkest", colors: colorTable.darkest };
+  }
+
   const theme = getTheme(hostName);
   let colors = colorTable[theme];
-  const platform = os.platform ? os.platform() : "";
+  const platform = os?.platform ? os.platform() : "";
 
   // Overrides
   if (hostName.startsWith("premierepro")) {
@@ -137,14 +143,19 @@ const UXP_VAR_WORKING_APPS = ["photoshop"];
 
 export const polyfillUXPVars = () => {
   const hostName =
-    uxp.host.name.toLowerCase().replace(/\s/g, "") || ("" as string);
+    uxp?.host?.name?.toLowerCase()?.replace(/\s/g, "") || ("browser" as string);
+
+  if (hostName === "browser") {
+    updateColorScheme({ theme: "darkest", colors: colorTable.darkest });
+    return;
+  }
 
   if (UXP_VAR_WORKING_APPS.find((app) => hostName.includes(app))) return;
   getColorScheme().then((scheme) => {
     updateColorScheme(scheme);
   });
   //@ts-ignore
-  document.theme.onUpdated.addListener(() =>
+  document.theme?.onUpdated?.addListener(() =>
     getColorScheme().then((scheme) => {
       updateColorScheme(scheme);
     }),

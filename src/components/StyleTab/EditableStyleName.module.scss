@@ -1,0 +1,59 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nameBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--c-text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nameBtn:focus-visible {
+  outline: 2px solid var(--c-accent-secondary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.input {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--c-text-primary);
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-accent-primary);
+  border-radius: 6px;
+  padding: 4px 8px;
+  min-width: 120px;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-accent-secondary);
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.pencil {
+  color: var(--c-text-muted);
+  display: flex;
+}

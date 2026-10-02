@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoCaption — Full Panel Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0B0F1A;
+      --surface: #131A2A;
+      --card: #1B2436;
+      --border: #2A3549;
+      --blue: #3B82F6;
+      --blue2: #60A5FA;
+      --teal: #22D3AA;
+      --text: #E8ECF4;
+      --muted: #8B96AD;
+      --danger: #F26D6D;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      padding: 32px;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(59,130,246,.18), transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(34,211,170,.1), transparent 45%),
+        #070a12;
+      color: var(--text);
+    }
+    .stage-label {
+      position: fixed; top: 16px; left: 20px;
+      font-size: 12px; color: var(--muted); letter-spacing: .04em;
+    }
+    .stage-label strong { color: var(--blue2); }
+    .panel {
+      width: 380px; height: 720px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(59,130,246,.15);
+    }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-size: 15px; font-weight: 700; }
+    .btn {
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      border-radius: 7px; padding: 7px 12px; font: 600 12px/1 "DM Sans", sans-serif;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--blue); color: var(--blue2); }
+    .btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.08); color: #fff; }
+    .btn-outline { background: transparent; }
+    .video {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .thumbs { display: flex; gap: 4px; flex: 1; overflow: hidden; }
+    .thumb {
+      width: 34px; height: 22px; border-radius: 3px; border: 1px solid var(--border);
+      background: linear-gradient(135deg, #1B2436, #2A3549);
+    }
+    .thumb.on { border-color: var(--blue); }
+    .icon-btn {
+      width: 28px; height: 28px; border: none; border-radius: 6px;
+      background: transparent; color: var(--text); cursor: pointer; font-size: 13px;
+    }
+    .icon-btn:hover { background: var(--card); }
+    .tc {
+      font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--muted);
+      min-width: 92px; text-align: center;
+    }
+    .tabs {
+      display: flex; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1; padding: 11px 6px; border: none; border-bottom: 2px solid transparent;
+      background: transparent; color: var(--muted); font: 500 12px "DM Sans", sans-serif;
+      cursor: pointer;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.on { color: var(--blue); border-bottom-color: var(--blue); }
+    .body { flex: 1; overflow: auto; position: relative; }
+    .pane { display: none; padding: 12px; height: 100%; }
+    .pane.on { display: block; }
+    .pane.style-pane.on { display: flex; flex-direction: column; padding: 0; }
+    .label {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 6px;
+    }
+    select, input[type=number], input[type=text] {
+      width: 100%; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      font: 400 13px "DM Sans", sans-serif; margin-bottom: 12px;
+    }
+    .row3 { display: flex; gap: 8px; margin-bottom: 8px; }
+    .row3 > div { flex: 1; min-width: 0; }
+    .field-l { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 12px; margin-bottom: 12px;
+    }
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    input[type=range] { flex: 1; accent-color: var(--blue); }
+    .val { font: 600 12px "JetBrains Mono", monospace; color: var(--blue2); min-width: 44px; text-align: right; }
+    .toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border);
+    }
+    .toggle:last-child { border-bottom: none; }
+    .toggle p { font-size: 13px; font-weight: 500; }
+    .toggle span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+    .switch {
+      width: 40px; height: 22px; border-radius: 11px; border: 1px solid var(--border);
+      background: var(--surface); position: relative; cursor: pointer; flex-shrink: 0;
+    }
+    .switch.on { background: var(--blue); border-color: var(--blue); }
+    .switch i {
+      position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--text); transition: transform .15s;
+    }
+    .switch.on i { transform: translateX(18px); }
+    .cap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .cap-meta { font: 500 10px "JetBrains Mono", monospace; color: var(--muted); margin-bottom: 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 3px 8px; border-radius: 999px; font-size: 12px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    }
+    .chip.on { background: var(--teal); border-color: var(--teal); color: var(--bg); font-weight: 700; }
+    .pills {
+      display: flex; gap: 4px; padding: 3px; margin: 12px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    }
+    .pill {
+      flex: 1; padding: 7px 8px; border: none; border-radius: 999px;
+      background: transparent; color: var(--muted); font: 500 12px "DM Sans", sans-serif;
+      cursor: pointer;
+    }
+    .pill.on { background: var(--blue); color: #fff; }
+    .style-scroll { flex: 1; overflow: auto; padding: 0 12px 12px; }
+    .style-footer {
+      display: flex; gap: 8px; padding: 10px 12px;
+      border-top: 1px solid var(--border); background: var(--surface);
+    }
+    .style-footer .btn { flex: 1; }
+    .anim-card, .preset-card {
+      width: 100%; text-align: left; padding: 12px; margin-bottom: 8px;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+      color: var(--text); cursor: pointer; font-family: inherit;
+    }
+    .anim-card.on, .preset-card.on { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+    .anim-card b, .preset-card b { display: block; font-size: 13px; margin-bottom: 2px; }
+    .anim-card small { color: var(--muted); font-size: 11px; }
+    .grid2 { display: flex; flex-wrap: wrap; gap: 8px; }
+    .grid2 > * { width: calc(50% - 4px); }
+    .preview-box {
+      height: 56px; border-radius: 6px; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); margin-bottom: 6px;
+    }
+    .name-row { display: flex; align-items: center; gap: 8px; margin: 10px 0 14px; }
+    .name-row h2 { font-size: 18px; font-weight: 700; }
+    .badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 999px; color: var(--blue2);
+      background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.35);
+    }
+    .stroke-row { display: flex; gap: 10px; align-items: flex-end; }
+    .swatch {
+      flex: 1; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .swatch input { opacity: 0; position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+    .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .chip-f {
+      padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font: 500 11px "DM Sans", sans-serif; cursor: pointer;
+    }
+    .chip-f.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .tpl {
+      position: relative; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px; margin-bottom: 0;
+    }
+    .tpl.applied { border-color: var(--teal); }
+    .tpl-prev {
+      height: 72px; border-radius: 6px; border: 1px solid var(--border);
+      position: relative; overflow: hidden; margin-bottom: 8px;
+    }
+    .tpl-ov {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(11,15,26,.55); opacity: 0; transition: .12s;
+    }
+    .tpl:hover .tpl-ov { opacity: 1; }
+    .applied-badge { font-size: 10px; font-weight: 700; color: var(--teal); }
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(11,15,26,.72);
+      align-items: center; justify-content: center; z-index: 50; padding: 16px;
+    }
+    .modal-bg.on { display: flex; }
+    .modal {
+      width: 100%; max-width: 360px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .modal-h {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+    }
+    .modal-h h3 { font-size: 15px; }
+    .modal-b { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .opt {
+      padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--card); cursor: pointer;
+    }
+    .opt.on { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+    .opt b { display: block; font-size: 13px; margin-bottom: 4px; }
+    .opt p { font-size: 11px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+    .note {
+      width: 280px; background: rgba(19,26,42,.9); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; font-size: 13px; line-height: 1.5; color: var(--muted);
+    }
+    .note h3 { color: var(--text); font-size: 14px; margin-bottom: 8px; }
+    .note li { margin: 6px 0 6px 16px; }
+    .note .ok { color: var(--teal); }
+    .note .pend { color: #F6D55C; }
+  </style>
+</head>
+<body>
+  <div class="stage-label">AutoCaption · <strong>full interactive mock</strong> · open in browser · share with friend</div>
+
+  <div class="panel" id="panel">
+    <header class="header">
+      <h1>AutoCaption</h1>
+      <button class="btn" id="exportBtn">Export</button>
+    </header>
+
+    <div class="video">
+      <div class="thumbs" id="thumbs"></div>
+      <button class="icon-btn" id="playBtn" title="Play">▶</button>
+      <button class="icon-btn" id="muteBtn" title="Mute">🔊</button>
+      <span class="tc" id="tc">00:00:00 / 00:12:00</span>
+      <button class="icon-btn" title="Fullscreen">⛶</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="captions">Captions</button>
+      <button class="tab" data-tab="style">Style</button>
+      <button class="tab" data-tab="templates">Templates</button>
+    </div>
+
+    <div class="body">
+      <!-- CAPTIONS -->
+      <div class="pane on" id="pane-captions">
+        <p class="label">Language</p>
+        <select id="lang">
+          <option>English</option>
+          <option>Hindi</option>
+          <option>Hindi+English (code-mixed)</option>
+        </select>
+        <div class="row3">
+          <div><span class="field-l">Words</span><select><option>Default</option><option>Auto</option><option>Manual</option></select></div>
+          <div><span class="field-l">Lines</span><select><option>1</option><option selected>2</option><option>3</option></select></div>
+          <div><span class="field-l">Characters</span><input type="number" value="42" min="10" max="120" /></div>
+        </div>
+        <div class="card">
+          <p class="label" style="margin-bottom:8px">Delay</p>
+          <div class="slider-row">
+            <input type="range" id="delay" min="-2000" max="2000" step="100" value="0" />
+            <span class="val" id="delayVal">0.0s</span>
+          </div>
+        </div>
+        <div class="card" id="toggles"></div>
+        <p class="label">Captions</p>
+        <div id="caps"></div>
+      </div>
+
+      <!-- STYLE -->
+      <div class="pane style-pane" id="pane-style">
+        <div class="pills" id="stylePills">
+          <button class="pill" data-sub="animate">Animate</button>
+          <button class="pill on" data-sub="style">Style</button>
+          <button class="pill" data-sub="presets">Presets</button>
+        </div>
+        <div class="style-scroll">
+          <div id="sub-animate" style="display:none"></div>
+          <div id="sub-style"></div>
+          <div id="sub-presets" style="display:none" class="grid2"></div>
+        </div>
+        <div class="style-footer">
+          <button class="btn btn-primary" onclick="toast('Apply at Playhead (mock)')">Apply at Playhead</button>
+          <button class="btn btn-outline" onclick="toast('Update Selected (mock)')">Update Selected</button>
+        </div>
+      </div>
+
+      <!-- TEMPLATES -->
+      <div class="pane" id="pane-templates">
+        <div class="filters" id="filters"></div>
+        <div class="grid2" id="tplGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="note">
+    <h3>What’s in this mock</h3>
+    <ul>
+      <li class="ok">✓ Captions — language, delay, toggles, word chips</li>
+      <li class="ok">✓ Style — Animate / Style / Presets + sticky actions</li>
+      <li class="ok">✓ Templates — filters + Apply badge</li>
+      <li class="ok">✓ Export modal — SRT / Burn In</li>
+      <li class="ok">✓ Video bar — play / mute / live timecode</li>
+      <li class="pend">⏳ Real Premiere + transcription still pending</li>
+    </ul>
+    <p style="margin-top:12px;font-size:12px">Click every tab — state persists. Share this HTML file with your friend.</p>
+  </aside>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <div class="modal-h">
+        <h3>Export</h3>
+        <button class="icon-btn" id="modalClose">✕</button>
+      </div>
+      <div class="modal-b" id="exportOpts"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+
+    // —— Video mock ——
+    let t = 0, dur = 12, playing = false, muted = false;
+    const thumbs = $("#thumbs");
+    for (let i = 0; i < 6; i++) {
+      const d = document.createElement("div");
+      d.className = "thumb" + (i === 0 ? " on" : "");
+      thumbs.appendChild(d);
+    }
+    function fmt(s) {
+      const m = Math.floor(s/60), sec = Math.floor(s%60), f = Math.floor((s%1)*30);
+      return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}:${String(f).padStart(2,"0")}`;
+    }
+    function tickUI() {
+      $("#tc").textContent = `${fmt(t)} / ${fmt(dur)}`;
+      const idx = Math.min(5, Math.floor((t/dur)*6));
+      $$(".thumb").forEach((el,i) => el.classList.toggle("on", i === idx));
+      highlightWords(t);
+    }
+    setInterval(() => {
+      if (!playing) return;
+      t += 0.1;
+      if (t >= dur) { t = dur; playing = false; $("#playBtn").textContent = "▶"; }
+      tickUI();
+    }, 100);
+    $("#playBtn").onclick = () => {
+      if (!playing && t >= dur) t = 0;
+      playing = !playing;
+      $("#playBtn").textContent = playing ? "❚❚" : "▶";
+    };
+    $("#muteBtn").onclick = () => {
+      muted = !muted;
+      $("#muteBtn").textContent = muted ? "🔇" : "🔊";
+    };
+
+    // —— Tabs ——
+    $$(".tab").forEach(btn => btn.onclick = () => {
+      $$(".tab").forEach(b => b.classList.toggle("on", b === btn));
+      $$(".pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + btn.dataset.tab));
+    });
+
+    // —— Captions ——
+    $("#delay").oninput = e => {
+      const v = Number(e.target.value)/1000;
+      $("#delayVal").textContent = (v>0?"+":"") + v.toFixed(1) + "s";
+    };
+    const toggleData = [
+      ["Remove punctuation", "Strip commas, periods, quotes"],
+      ["Remove gaps", "Tighten silent gaps"],
+      ["Remove emphasis", "Normalize ALL-CAPS"],
+    ];
+    const toggles = $("#toggles");
+    toggleData.forEach(([title, desc]) => {
+      const row = document.createElement("div");
+      row.className = "toggle";
+      row.innerHTML = `<div><p>${title}</p><span>${desc}</span></div><button class="switch" type="button"><i></i></button>`;
+      row.querySelector(".switch").onclick = function(){ this.classList.toggle("on"); };
+      toggles.appendChild(row);
+    });
+    const captions = [
+      { start:0, end:2.4, words:[["Welcome",0,.45],["to",.45,.65],["AutoCaption",.65,1.4],["for",1.4,1.65],["Premiere",1.65,2.4]] },
+      { start:2.5, end:5.1, words:[["Edit",2.5,2.85],["timing,",2.85,3.4],["style,",3.4,3.9],["and",3.9,4.15],["export",4.15,4.7],["easily.",4.7,5.1]] },
+      { start:5.2, end:8, words:[["Switch",5.2,5.6],["tabs",5.6,6],["to",6,6.2],["customize",6.2,6.9],["your",6.9,7.15],["look.",7.15,8]] },
+      { start:8.1, end:11, words:[["Apply",8.1,8.5],["presets",8.5,9.1],["or",9.1,9.3],["build",9.3,9.7],["your",9.7,9.95],["own",9.95,10.3],["style.",10.3,11]] },
+    ];
+    const caps = $("#caps");
+    function renderCaps() {
+      caps.innerHTML = "";
+      captions.forEach((c, i) => {
+        const el = document.createElement("div");
+        el.className = "cap";
+        el.innerHTML = `<div class="cap-meta">${c.start.toFixed(1)}s – ${c.end.toFixed(1)}s</div><div class="chips"></div>`;
+        const chips = el.querySelector(".chips");
+        c.words.forEach(([text, a, b]) => {
+          const s = document.createElement("span");
+          s.className = "chip";
+          s.dataset.a = a; s.dataset.b = b;
+          s.textContent = text;
+          chips.appendChild(s);
+        });
+        caps.appendChild(el);
+      });
+      highlightWords(t);
+    }
+    function highlightWords(time) {
+      $$(".chip").forEach(ch => {
+        const a = +ch.dataset.a, b = +ch.dataset.b;
+        ch.classList.toggle("on", time >= a && time < b);
+      });
+    }
+    renderCaps();
+
+    // —— Style sub-tabs ——
+    $$("#stylePills .pill").forEach(btn => btn.onclick = () => {
+      $$("#stylePills .pill").forEach(b => b.classList.toggle("on", b === btn));
+      ["animate","style","presets"].forEach(id => {
+        $("#sub-"+id).style.display = btn.dataset.sub === id ? (id==="presets"?"flex":"block") : "none";
+        if (id==="presets") $("#sub-presets").className = "grid2";
+      });
+    });
+    const anims = [
+      ["Fade In","Opacity ease-in on each word"],
+      ["Typewriter","Reveal characters sequentially"],
+      ["Pop","Scale bounce on active word"],
+      ["Slide Up","Translate up into place"],
+    ];
+    const animBox = $("#sub-animate");
+    anims.forEach(([n,d],i) => {
+      const b = document.createElement("button");
+      b.className = "anim-card" + (i===0?" on":"");
+      b.innerHTML = `<b>${n}</b><small>${d}</small>`;
+      b.onclick = () => { $$(".anim-card").forEach(x=>x.classList.remove("on")); b.classList.add("on"); };
+      animBox.appendChild(b);
+    });
+    const styleBox = $("#sub-style");
+    styleBox.innerHTML = `
+      <div class="card">
+        <div class="toggle"><div><p>Pause on hover</p></div><button class="switch" type="button"><i></i></button></div>
+        <div class="toggle"><div><p>Chalkboard mode</p></div><button class="switch" type="button"><i></i></button></div>
+      </div>
+      <div class="name-row"><h2 contenteditable="true">TypeMotion</h2><span class="badge">Your Text</span></div>
+      <p class="label">Stroke</p>
+      <div class="card">
+        <div class="stroke-row">
+          <div style="width:72px"><span class="field-l">Width</span><input type="number" value="0" min="0" max="20" style="margin:0" /></div>
+          <div class="swatch" style="background:#fff"><input type="color" value="#ffffff" oninput="this.parentElement.style.background=this.value" /></div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:12px">Effects</p>
+      <div class="card" id="effects">
+        <div class="toggle"><div><p>Gradient</p></div><button class="switch" type="button"><i></i></button></div>
+        <div class="toggle"><div><p>Glow</p></div><button class="switch on" type="button" id="glowSw"><i></i></button></div>
+        <div id="glowCtrls" style="padding:4px 0 8px 8px;margin-left:4px;border-left:2px solid var(--border)">
+          <span class="field-l">Color</span>
+          <div class="swatch" style="background:#3B82F6;margin-bottom:10px"><input type="color" value="#3B82F6" oninput="this.parentElement.style.background=this.value" /></div>
+          <div class="slider-row" style="margin-bottom:8px"><span style="font-size:12px;min-width:70px">Blur</span><input type="range" min="0" max="100" value="20" oninput="this.nextElementSibling.textContent=this.value" /><span class="val">20</span></div>
+          <div class="slider-row"><span style="font-size:12px;min-width:70px">Intensity</span><input type="range" min="0" max="100" value="40" oninput="this.nextElementSibling.textContent=this.value" /><span class="val">40</span></div>
+        </div>
+      </div>`;
+    styleBox.querySelectorAll(".switch").forEach(sw => sw.onclick = function(){
+      this.classList.toggle("on");
+      if (this.id === "glowSw") $("#glowCtrls").style.display = this.classList.contains("on") ? "block" : "none";
+    });
+    const presets = [
+      ["TypeMotion","#3B82F6"],["Neon Pop","#22D3AA"],["Clean Fade","#8B96AD"],["Slide Bold","#60A5FA"]
+    ];
+    const preBox = $("#sub-presets");
+    presets.forEach(([n,c]) => {
+      const b = document.createElement("button");
+      b.className = "preset-card";
+      b.innerHTML = `<div class="preview-box" style="background:${c}">Aa</div><b>${n}</b>`;
+      b.onclick = () => {
+        toast("Preset applied → Style tab");
+        $$("#stylePills .pill").forEach(p => p.classList.toggle("on", p.dataset.sub==="style"));
+        $("#sub-animate").style.display="none";
+        $("#sub-presets").style.display="none";
+        $("#sub-style").style.display="block";
+        styleBox.querySelector("h2").textContent = n;
+      };
+      preBox.appendChild(b);
+    });
+
+    // —— Templates ——
+    const filters = ["All","Minimal","Bold","Animated","Branded"];
+    let filter = "All", applied = null;
+    const tpls = [
+      {n:"Soft Minimal",c:"Minimal",col:"#2A3549"},
+      {n:"Bold Impact",c:"Bold",col:"#3B82F6"},
+      {n:"Kinetic Pop",c:"Animated",col:"#22D3AA"},
+      {n:"Brand Blue",c:"Branded",col:"#60A5FA"},
+      {n:"Quiet Line",c:"Minimal",col:"#8B96AD"},
+      {n:"Heavy Stack",c:"Bold",col:"#F26D6D"},
+      {n:"Typewriter FX",c:"Animated",col:"#E8ECF4"},
+      {n:"Studio Mark",c:"Branded",col:"#131A2A"},
+    ];
+    const filtEl = $("#filters");
+    filters.forEach(f => {
+      const b = document.createElement("button");
+      b.className = "chip-f" + (f==="All"?" on":"");
+      b.textContent = f;
+      b.onclick = () => { filter = f; $$(".chip-f").forEach(x=>x.classList.toggle("on",x.textContent===f)); renderTpls(); };
+      filtEl.appendChild(b);
+    });
+    function renderTpls() {
+      const grid = $("#tplGrid");
+      grid.innerHTML = "";
+      tpls.filter(t => filter==="All" || t.c===filter).forEach((t,i) => {
+        const id = t.n;
+        const el = document.createElement("div");
+        el.className = "tpl" + (applied===id?" applied":"");
+        el.innerHTML = `
+          <div class="tpl-prev" style="background:${t.col}">
+            <div class="tpl-ov"><button class="btn btn-primary">Apply</button></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;font-weight:500">${t.n}</span>
+            ${applied===id?'<span class="applied-badge">✓ Applied</span>':''}
+          </div>`;
+        el.querySelector("button").onclick = () => { applied = id; renderTpls(); toast("Template applied: "+id); };
+        grid.appendChild(el);
+      });
+    }
+    renderTpls();
+
+    // —— Export ——
+    $("#exportBtn").onclick = () => $("#modal").classList.add("on");
+    $("#modalClose").onclick = () => $("#modal").classList.remove("on");
+    $("#modal").onclick = e => { if (e.target.id==="modal") e.target.classList.remove("on"); };
+    const opts = [
+      ["srt","Export as SRT","Download a timed subtitle file compatible with most editors."],
+      ["burn-in","Burn In Template","Render captions into the video using the applied style/template."],
+    ];
+    let exportType = "srt";
+    const box = $("#exportOpts");
+    function renderExport() {
+      box.innerHTML = "";
+      opts.forEach(([type,title,desc]) => {
+        const d = document.createElement("div");
+        d.className = "opt" + (exportType===type?" on":"");
+        d.innerHTML = `<b>${title}</b><p>${desc}</p><button class="btn btn-primary" style="width:100%">Confirm</button>`;
+        d.onclick = (e) => {
+          if (e.target.tagName === "BUTTON") { toast("Export "+type+" (mock)"); $("#modal").classList.remove("on"); return; }
+          exportType = type; renderExport();
+        };
+        box.appendChild(d);
+      });
+    }
+    renderExport();
+
+    function toast(msg) {
+      let t = document.getElementById("toast");
+      if (!t) {
+        t = document.createElement("div");
+        t.id = "toast";
+        t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B2436;border:1px solid #3B82F6;color:#E8ECF4;padding:10px 16px;border-radius:8px;font:500 13px DM Sans,sans-serif;z-index:99;box-shadow:0 8px 32px rgba(0,0,0,.4)";
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = "1";
+      clearTimeout(t._x);
+      t._x = setTimeout(() => t.style.opacity = "0", 1800);
+    }
+    tickUI();
+  </script>
+</body>
+</html>

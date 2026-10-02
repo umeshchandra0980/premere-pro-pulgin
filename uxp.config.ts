@@ -2,10 +2,12 @@ import { UXP_Manifest, UXP_Config, UXP_Config_Extra } from "vite-uxp-plugin";
 import { version } from "./package.json";
 
 const extraPrefs: UXP_Config_Extra = {
-  hotReloadPort: 8080,
-    copyZipAssets: ["public-zip/*"],
+  hotReloadPort: 8081, // 8080 is often taken by Cursor AgentService on this machine
+  copyZipAssets: ["public-zip/*"],
   uniqueIds: true,
   debugger: "udt",
+  webviewUi: false,
+  webviewReloadPort: 5174,
 };
 
 export const id = "com.bolt.uxp"; 
@@ -128,10 +130,9 @@ const manifest: UXP_Manifest = {
     },
     allowCodeGenerationFromStrings: true,
 
-    enableAddon: true, 
-  },
-  addon: {
-    name: "bolt-uxp-hybrid.uxpaddon",
+    // Hybrid C++ addon disabled — not needed for AutoCaption panel UI,
+    // and missing dist binaries crash vite-uxp-plugin copyHybridBinaries.
+    enableAddon: false,
   },
   icons: [
     {
