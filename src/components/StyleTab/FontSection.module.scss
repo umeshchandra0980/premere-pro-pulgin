@@ -14,28 +14,34 @@
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card > * {
+  margin-bottom: 10px;
+}
+
+.card > *:last-child {
+  margin-bottom: 0;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .fieldGrow {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   flex: 1;
   min-width: 0;
+  margin-right: 8px;
 }
 
 .weightField {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 110px;
+  width: 100px;
   flex-shrink: 0;
 }
 
@@ -45,6 +51,7 @@
   justify-content: space-between;
   font-size: 11px;
   color: var(--c-text-muted);
+  margin-bottom: 4px;
 }
 
 .value {
@@ -55,12 +62,14 @@
 
 .select {
   width: 100%;
-  padding: 8px 10px;
+  height: 34px;
+  line-height: 20px;
+  padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid var(--c-border);
   background: var(--c-surface);
   color: var(--c-text-primary);
-  font-size: 13px;
+  font-size: 12px;
   box-sizing: border-box;
   cursor: pointer;
 }
@@ -73,24 +82,25 @@
 .row {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  width: 100%;
 }
 
 .range {
   width: 100%;
   accent-color: var(--c-accent-primary);
   cursor: pointer;
+  height: 6px;
 }
 
 .fillRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  width: 100%;
 }
 
 .sample {
   margin-top: 2px;
-  padding: 14px 12px;
+  padding: 12px 10px;
   border-radius: 8px;
   background: #0a0e18;
   border: 1px solid var(--c-border);
@@ -99,3 +109,4 @@
   letter-spacing: 0.02em;
   user-select: none;
 }
+

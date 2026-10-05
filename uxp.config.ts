@@ -109,6 +109,12 @@ const manifest: UXP_Manifest = {
     },
     network: {
       domains: [
+        "all",
+        "https://plug-backend-jsfa.onrender.com",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1",
+        "http://localhost",
         "https://hyperbrew.co",
         "https://github.com",
         "https://vitejs.dev",

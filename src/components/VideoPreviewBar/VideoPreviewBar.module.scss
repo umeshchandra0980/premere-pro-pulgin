@@ -9,10 +9,17 @@
 .stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 220px;
+  height: 180px;
+  min-height: 140px;
   overflow: hidden;
   background: #070b14;
+}
+
+@media (min-width: 680px) {
+  .stage {
+    height: 220px;
+    min-height: 180px;
+  }
 }
 
 .filmGrain {
@@ -183,74 +190,88 @@
 .bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px 10px;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--c-surface);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .thumbs {
   display: flex;
-  gap: 4px;
+  align-items: center;
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  margin-right: 8px;
 }
 
 .thumb {
-  width: 36px;
-  height: 24px;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 18px !important;
   border-radius: 3px;
   background: var(--c-card-bg);
   border: 1px solid var(--c-border);
   flex-shrink: 0;
-  opacity: 0.85;
-  padding: 0;
+  opacity: 0.8;
+  padding: 0 !important;
+  margin-right: 4px;
   cursor: pointer;
+  transition: all 0.12s ease;
+  box-sizing: border-box;
 }
 
 .thumb:hover {
   opacity: 1;
+  border-color: var(--c-accent-secondary);
 }
 
 .thumbActive {
   border-color: var(--c-accent-primary);
   opacity: 1;
+  box-shadow: 0 0 0 1px var(--c-accent-primary);
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 4px;
   flex-shrink: 0;
 }
 
 .iconBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  margin: 0 2px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--c-text-primary);
   cursor: pointer;
-  padding: 0;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .iconBtn:hover {
   background: var(--c-card-bg);
+  color: #FFFFFF;
 }
 
 .iconBtn:focus-visible {
   outline: 2px solid var(--c-accent-secondary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 .timecode {
   font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
   font-size: 11px;
+  font-weight: 500;
   color: var(--c-text-muted);
-  min-width: 88px;
-  text-align: center;
+  padding: 0 4px;
+  white-space: nowrap;
   user-select: none;
 }
+

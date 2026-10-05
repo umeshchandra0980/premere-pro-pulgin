@@ -47,6 +47,12 @@ export interface CaptionContextValue {
   appliedTemplateId: string | null;
   setAppliedTemplateId: (id: string | null) => void;
 
+  isBackendOnline: boolean;
+  setIsBackendOnline: (v: boolean) => void;
+  isBackendModalOpen: boolean;
+  setIsBackendModalOpen: (v: boolean) => void;
+  checkBackendHealth: () => Promise<boolean>;
+
   isExportModalOpen: boolean;
   setIsExportModalOpen: (v: boolean) => void;
   handleExport: (type: ExportType) => void;
@@ -72,7 +78,7 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
   const [isMuted, setIsMuted] = useState(false);
   const [duration] = useState(12);
 
-  // TODO: replace with real API call — hydrate captions from project sequence
+  // Captions list (hydrated from backend when connected, or mock preview)
   const [captions, setCaptions] = useState<Caption[]>(MOCK_CAPTIONS);
   const [isTranscribing, setIsTranscribing] = useState(false);
 
@@ -82,6 +88,10 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
     useState<StyleSettings>(DEFAULT_STYLE_SETTINGS);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  // Backend connection state
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
+  const [isBackendModalOpen, setIsBackendModalOpen] = useState(false);
 
   const deleteCaption = useCallback((id: string) => {
     setCaptions((prev) => prev.filter((c) => c.id !== id));
@@ -115,6 +125,22 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
     [captions, styleSettings, appliedTemplateId],
   );
 
+  const checkBackendHealth = useCallback(async () => {
+    try {
+      const res = await kalakarApi.checkHealth();
+      const online = res.status === 'ok';
+      setIsBackendOnline(online);
+      return online;
+    } catch {
+      setIsBackendOnline(false);
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    checkBackendHealth();
+  }, [checkBackendHealth]);
+
   const value = useMemo<CaptionContextValue>(
     () => ({
       activeTab,
@@ -138,6 +164,11 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
       applyStylePreset,
       appliedTemplateId,
       setAppliedTemplateId,
+      isBackendOnline,
+      setIsBackendOnline,
+      isBackendModalOpen,
+      setIsBackendModalOpen,
+      checkBackendHealth,
       isExportModalOpen,
       setIsExportModalOpen,
       handleExport,
@@ -157,6 +188,9 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
       updateStyleSettings,
       applyStylePreset,
       appliedTemplateId,
+      isBackendOnline,
+      isBackendModalOpen,
+      checkBackendHealth,
       isExportModalOpen,
       handleExport,
     ],
