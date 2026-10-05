@@ -8,11 +8,27 @@
 .grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  margin: -4px;
+  width: calc(100% + 8px);
+  box-sizing: border-box;
 }
 
 .grid > * {
-  width: calc(50% - 4px);
+  width: calc(50% - 8px);
+  margin: 4px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  .grid > * {
+    width: calc(33.333% - 8px);
+  }
+}
+
+@media (min-width: 900px) {
+  .grid > * {
+    width: calc(25% - 8px);
+  }
 }
 
 .empty {

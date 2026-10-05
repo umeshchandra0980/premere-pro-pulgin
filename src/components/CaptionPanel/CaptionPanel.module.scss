@@ -3,37 +3,129 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  min-height: 480px;
+  min-height: 0;
   background: var(--c-background);
   color: var(--c-text-primary);
-  border: 1px solid var(--c-border);
-  border-radius: 0;
+  border: none;
   overflow: hidden;
   box-sizing: border-box;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   background: var(--c-surface);
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  color: #FFFFFF;
+  margin-right: 8px;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
 }
 
 .title {
   margin: 0;
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--c-text-primary);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+}
+
+.proBadge {
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: var(--c-accent-secondary);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.backendStatusBtn {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  border: 1px solid var(--c-border);
+  background: var(--c-card-bg);
+  color: var(--c-text-muted);
+}
+
+.backendStatusBtn:hover {
+  color: var(--c-text-primary);
+  border-color: var(--c-accent-secondary);
+}
+
+.backendOnline {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+  color: #86efac;
+}
+
+.backendOffline {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: rgba(234, 179, 8, 0.06);
+  color: #fde047;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.dotOnline {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+
+.dotOffline {
+  background: #eab308;
+  box-shadow: 0 0 6px rgba(234, 179, 8, 0.5);
 }
 
 .exportBtn {
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12px;
   border-radius: 6px;
   border: 1px solid var(--c-border);
   background: var(--c-card-bg);
@@ -41,16 +133,43 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .exportBtn:hover {
   border-color: var(--c-accent-primary);
-  color: var(--c-accent-secondary);
+  color: #FFFFFF;
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .exportBtn:focus-visible {
   outline: 2px solid var(--c-accent-secondary);
-  outline-offset: 2px;
+  outline-offset: 1px;
+}
+
+/* Responsive Studio Workspace */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.previewSection {
+  width: 100%;
+  flex-shrink: 0;
+  background: var(--c-surface);
+}
+
+.controlsSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .body {
@@ -58,13 +177,37 @@
   min-height: 0;
   position: relative;
   background: var(--c-background);
+  overflow: hidden;
 }
 
 .tabPane {
   height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
+
+/* Wide screen / Laptop / Desktop Studio View */
+@media (min-width: 680px) {
+  .workspace {
+    flex-direction: row;
+  }
+
+  .previewSection {
+    flex: 1.1;
+    min-width: 290px;
+    max-width: 460px;
+    border-right: 1px solid var(--c-border);
+    border-bottom: none;
+    overflow-y: auto;
+  }
+
+  .controlsSection {
+    flex: 1.4;
+    min-width: 320px;
+  }
+}
+

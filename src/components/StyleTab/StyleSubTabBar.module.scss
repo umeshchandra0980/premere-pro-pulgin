@@ -1,23 +1,35 @@
 .bar {
   display: flex;
-  gap: 4px;
+  align-items: center;
   padding: 3px;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: 999px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .pill {
   flex: 1;
-  padding: 7px 10px;
+  height: 28px;
+  padding: 0 10px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: var(--c-text-muted);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
+  margin-right: 3px;
+  box-sizing: border-box;
   transition: background 0.12s ease, color 0.12s ease;
+}
+
+.pill:last-child {
+  margin-right: 0;
 }
 
 .pill:hover {
@@ -34,3 +46,4 @@
   color: #ffffff;
   border-color: var(--c-accent-primary);
 }
+

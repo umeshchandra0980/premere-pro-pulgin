@@ -1,8 +1,7 @@
 .line {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
   padding: 10px 12px;
   background: var(--c-card-bg);
   border: 1px solid var(--c-border);

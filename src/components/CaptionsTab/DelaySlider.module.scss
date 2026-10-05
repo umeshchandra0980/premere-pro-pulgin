@@ -1,35 +1,37 @@
 .wrap {
-  padding: 16px 12px;
+  padding: 4px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  align-items: stretch;
+  width: 100%;
 }
 
 .label {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--c-text-primary);
 }
 
 .track {
   display: flex;
   align-items: center;
-  gap: 10px;
+  width: 100%;
 }
 
 .range {
   flex: 1;
   accent-color: var(--c-accent-primary);
   cursor: pointer;
+  margin-right: 10px;
+  height: 6px;
 }
 
 .value {
-  min-width: 48px;
+  min-width: 44px;
   text-align: right;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--c-accent-secondary);
   font-weight: 600;
 }
+

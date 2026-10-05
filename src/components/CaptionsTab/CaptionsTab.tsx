@@ -66,7 +66,7 @@ export function CaptionsTab() {
 
   return (
     <div className={styles.root}>
-      <div>
+      <div className={styles.formGroup}>
         <p className={styles.sectionLabel}>Language</p>
         <select
           className={styles.select}

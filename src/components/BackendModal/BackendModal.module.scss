@@ -1,0 +1,154 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.wrap > * {
+  margin-bottom: 12px;
+}
+
+.wrap > *:last-child {
+  margin-bottom: 0;
+}
+
+.intro {
+  font-size: 11px;
+  color: var(--c-text-muted);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--c-text-muted);
+  margin-bottom: 5px;
+}
+
+.input {
+  width: 100%;
+  height: 34px;
+  line-height: 20px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-card-bg);
+  color: var(--c-text-primary);
+  font-size: 12px;
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  box-sizing: border-box;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--c-accent-secondary);
+  outline-offset: 1px;
+}
+
+.statusCard {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.statusOnline {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+.statusOffline {
+  background: #eab308;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.4);
+}
+
+.statusError {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.statusText {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--c-text-primary);
+  flex: 1;
+  line-height: 1.35;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.btn {
+  height: 32px;
+  padding: 0 12px !important;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.primaryBtn {
+  background: var(--c-accent-primary);
+  color: #ffffff;
+  border: none;
+  margin-right: 8px;
+}
+
+.primaryBtn:hover {
+  filter: brightness(1.1);
+}
+
+.secondaryBtn {
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border);
+  margin-right: 8px;
+}
+
+.secondaryBtn:hover {
+  border-color: var(--c-accent-secondary);
+}
+
+.btn:last-child {
+  margin-right: 0;
+}
+
+.commandBox {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #070a12;
+  border: 1px solid rgba(42, 53, 73, 0.6);
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 10px;
+  color: #a5b4fc;
+  user-select: all;
+  line-height: 1.4;
+}

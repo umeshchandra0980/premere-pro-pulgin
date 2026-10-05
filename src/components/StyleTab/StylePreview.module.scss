@@ -1,6 +1,8 @@
 .preview {
   background: #000;
+  height: 96px;
   min-height: 96px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8,7 +10,8 @@
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
 }
 
 .checker {
