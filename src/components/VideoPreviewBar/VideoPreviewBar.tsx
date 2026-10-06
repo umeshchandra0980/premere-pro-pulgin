@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, type CSSProperties } from 'react';
+import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 
 import { useCaptionContext } from '../../context/CaptionContext';
 import { resolveFontStack } from '../../data/mockCaptions';
 import type { Caption, StyleSettings } from '../../types/caption';
+import { uxp } from '../../globals';
+import { getPlayheadSeconds } from '../../api/premierepro';
 import styles from './VideoPreviewBar.module.scss';
 
 function formatTimecode(seconds: number): string {
@@ -76,22 +78,36 @@ export function VideoPreviewBar({
     styleSettings,
   } = useCaptionContext();
 
+  const isPremiere = uxp?.host?.name === 'premierepro';
+  const [hasNoSequence, setHasNoSequence] = useState(false);
+
   useEffect(() => {
-    if (!isPlaying) return;
-
-    const id = window.setInterval(() => {
-      setCurrentPlaybackTime((prev) => {
-        const next = prev + TICK_SEC;
-        if (next >= duration) {
-          setIsPlaying(false);
-          return duration;
+    if (isPremiere) {
+      const id = window.setInterval(async () => {
+        const secs = await getPlayheadSeconds();
+        if (secs === null) {
+          setHasNoSequence(true);
+        } else {
+          setHasNoSequence(false);
+          setCurrentPlaybackTime(secs);
         }
-        return next;
-      });
-    }, TICK_MS);
-
-    return () => window.clearInterval(id);
-  }, [isPlaying, duration, setCurrentPlaybackTime, setIsPlaying]);
+      }, 200);
+      return () => window.clearInterval(id);
+    } else {
+      if (!isPlaying) return;
+      const id = window.setInterval(() => {
+        setCurrentPlaybackTime((prev) => {
+          const next = prev + TICK_SEC;
+          if (next >= duration) {
+            setIsPlaying(false);
+            return duration;
+          }
+          return next;
+        });
+      }, TICK_MS);
+      return () => window.clearInterval(id);
+    }
+  }, [isPlaying, duration, setCurrentPlaybackTime, setIsPlaying, isPremiere]);
 
   const activeThumb = useMemo(() => {
     if (duration <= 0) return 0;
@@ -136,7 +152,11 @@ export function VideoPreviewBar({
         </div>
 
         <div className={styles.captionLayer} aria-live="polite">
-          {caption ? (
+          {hasNoSequence ? (
+            <p className={styles.idleHint} style={{ color: '#ef4444' }}>
+              No active sequence in Premiere Pro
+            </p>
+          ) : caption ? (
             <p
               className={`${styles.captionLine} ${styles[`anim_${styleSettings.selectedAnimation.replace(/-/g, '_')}`] ?? ''}`}
               style={captionCss}

@@ -8,7 +8,7 @@ export type WordsOption = 'default' | 'auto' | 'manual';
 
 export type TemplateCategory = 'All' | 'Minimal' | 'Bold' | 'Animated' | 'Branded';
 
-export type ExportType = 'srt' | 'burn-in';
+export type ExportType = 'srt' | 'burn_in_render';
 
 export type AnimationPreset = 'fade-in' | 'typewriter' | 'pop' | 'slide-up';
 
@@ -19,9 +19,12 @@ export type EasePreset = 'Elastic' | 'Ease Out' | 'Ease In Out' | 'Bounce' | 'Li
 export type ExitMode = 'mirror' | 'clone' | 'custom';
 
 export interface CaptionWord {
+  id: string;
   text: string;
   start: number;
   end: number;
+  confidence: number;
+  is_low_confidence: boolean;
 }
 
 export interface Caption {
@@ -29,6 +32,7 @@ export interface Caption {
   words: CaptionWord[];
   startTime: number;
   endTime: number;
+  is_edited: boolean;
 }
 
 export interface StyleSettings {

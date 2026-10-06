@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { kalakarApi } from '../../api/kalakarClient';
+import { mapBackendCaptionsToFrontend } from '../../api/mappers';
+import { MOCK_CAPTIONS } from '../../data/mockCaptions';
 
 import { useCaptionContext } from '../../context/CaptionContext';
 import type {
@@ -39,13 +43,94 @@ const EmphasisIcon = (
 export function CaptionsTab() {
   const {
     captions,
+    setCaptions,
     deleteCaption,
     currentPlaybackTime,
     isTranscribing,
     setIsTranscribing,
     captionsSettings,
     updateCaptionsSettings,
+    isBackendOnline,
+    currentJobId,
+    setCurrentJobId,
   } = useCaptionContext();
+
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
+
+  const handleGenerateCaptions = async () => {
+    if (!isBackendOnline) {
+      setIsTranscribing(true);
+      setTranscriptionError(null);
+      setTimeout(() => {
+        setCaptions(MOCK_CAPTIONS);
+        setIsTranscribing(false);
+      }, 2000);
+      return;
+    }
+
+    try {
+      setIsTranscribing(true);
+      setTranscriptionError(null);
+      
+      const proj = await kalakarApi.createProject('Premiere Sequence ' + Date.now());
+      const dummyAudio = new Blob(['dummy audio content'], { type: 'audio/mp3' });
+      const media = await kalakarApi.uploadMedia(proj.id, dummyAudio, 'sequence.mp3');
+      
+      const langMap: Record<string, string> = {
+        'hindi': 'hi-IN',
+        'english': 'en-IN',
+        'hindi-english': 'en-IN'
+      };
+      const backendLang = langMap[captionsSettings.transcriptionLanguage] || 'en-IN';
+      
+      const job = await kalakarApi.createJob(media.id, backendLang);
+      setCurrentJobId(job.id);
+    } catch (err: any) {
+      setTranscriptionError(err.message || 'Failed to start transcription');
+      setIsTranscribing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentJobId || !isTranscribing) return;
+
+    let timeoutId: number;
+    let isCancelled = false;
+
+    const poll = async () => {
+      try {
+        const statusRes = await kalakarApi.getJobStatus(currentJobId);
+        if (isCancelled) return;
+
+        if (statusRes.status === 'done') {
+          const capRes = await kalakarApi.getJobCaptions(currentJobId);
+          if (capRes && !isCancelled) {
+            setCaptions(mapBackendCaptionsToFrontend(capRes));
+            setIsTranscribing(false);
+          }
+        } else if (statusRes.status === 'failed') {
+          setTranscriptionError(statusRes.error_message || 'Transcription failed');
+          setIsTranscribing(false);
+          setCurrentJobId(null);
+        } else {
+          timeoutId = window.setTimeout(poll, 3000);
+        }
+      } catch (err: any) {
+        if (!isCancelled) {
+          setTranscriptionError(err.message || 'Error checking status');
+          setIsTranscribing(false);
+          setCurrentJobId(null);
+        }
+      }
+    };
+
+    poll();
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [currentJobId, isTranscribing, setCaptions, setIsTranscribing, setCurrentJobId]);
 
   const {
     transcriptionLanguage,
@@ -57,6 +142,23 @@ export function CaptionsTab() {
     removeGaps,
     removeEmphasis,
   } = captionsSettings;
+
+  useEffect(() => {
+    if (!currentJobId || !isBackendOnline) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await kalakarApi.resegment(currentJobId, {
+          max_words_per_segment: wordsOption === 'auto' ? 10 : Math.max(1, Math.floor(charactersLimit / 5))
+        });
+        setCaptions(mapBackendCaptionsToFrontend(res));
+      } catch (err) {
+        console.error('Failed to resegment', err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [wordsOption, linesOption, charactersLimit, currentJobId, isBackendOnline, setCaptions]);
 
   const onLanguageChange = (value: TranscriptionLanguage) => {
     updateCaptionsSettings({ transcriptionLanguage: value });
@@ -168,17 +270,17 @@ export function CaptionsTab() {
         />
       </div>
 
-      {/* Dev-only control to simulate transcription progress */}
       <button
         type="button"
         className={styles.devBtn}
-        onClick={() => setIsTranscribing(!isTranscribing)}
+        onClick={handleGenerateCaptions}
+        disabled={isTranscribing && !transcriptionError}
       >
-        [dev] Toggle processing ({isTranscribing ? 'on' : 'off'})
+        {isTranscribing && !transcriptionError ? 'Generating...' : 'Generate Captions'}
       </button>
 
-      {isTranscribing ? (
-        <TranscriptionProgress />
+      {isTranscribing || transcriptionError ? (
+        <TranscriptionProgress error={transcriptionError} />
       ) : (
         <div className={styles.list}>
           <p className={styles.sectionLabel}>Captions</p>
@@ -188,6 +290,7 @@ export function CaptionsTab() {
               caption={caption}
               currentPlaybackTime={currentPlaybackTime}
               onDelete={deleteCaption}
+              jobId={currentJobId}
             />
           ))}
           {captions.length === 0 ? (

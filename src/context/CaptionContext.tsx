@@ -2,14 +2,18 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
 
+import { kalakarApi } from '../api/kalakarClient';
+import { importSrtAsCaptionTrack, insertRenderedCaptionsToTimeline } from '../api/premierepro';
 import {
   DEFAULT_STYLE_SETTINGS,
   MOCK_CAPTIONS,
+  MOCK_TEMPLATES,
 } from '../data/mockCaptions';
 import type {
   Caption,
@@ -17,6 +21,7 @@ import type {
   ExportType,
   MainTab,
   StyleSettings,
+  TemplateItem,
 } from '../types/caption';
 
 export interface CaptionContextValue {
@@ -55,7 +60,12 @@ export interface CaptionContextValue {
 
   isExportModalOpen: boolean;
   setIsExportModalOpen: (v: boolean) => void;
-  handleExport: (type: ExportType) => void;
+  handleExport: (type: ExportType, templateId?: string) => Promise<void>;
+  
+  currentJobId: string | null;
+  setCurrentJobId: (id: string | null) => void;
+
+  templates: TemplateItem[];
 }
 
 const defaultCaptionsSettings: CaptionsTabSettings = {
@@ -88,10 +98,13 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
     useState<StyleSettings>(DEFAULT_STYLE_SETTINGS);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
 
   // Backend connection state
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [isBackendModalOpen, setIsBackendModalOpen] = useState(false);
+  
+  const [templates, setTemplates] = useState<TemplateItem[]>(MOCK_TEMPLATES);
 
   const deleteCaption = useCallback((id: string) => {
     setCaptions((prev) => prev.filter((c) => c.id !== id));
@@ -113,16 +126,51 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleExport = useCallback(
-    (type: ExportType) => {
-      // TODO: replace with real API call — run SRT export or burn-in render
-      console.log('[Export]', type, {
-        captions,
-        styleSettings,
-        appliedTemplateId,
-      });
+    async (type: ExportType, templateId?: string) => {
+      if (!currentJobId) throw new Error('Backend export creation failed: No active transcription job found');
+      
+      let exportRes;
+      try {
+        exportRes = await kalakarApi.createExport(currentJobId, type, templateId);
+      } catch (err: any) {
+        throw new Error(`Backend export creation failed: ${err.message}`);
+      }
+      
+      let exportStatus = exportRes.status;
+      let finalExport = exportRes;
+      
+      try {
+        while (exportStatus === 'pending' || exportStatus === 'processing') {
+          await new Promise((r) => setTimeout(r, 1500));
+          finalExport = await kalakarApi.getExport(exportRes.id);
+          exportStatus = finalExport.status;
+        }
+      } catch (err: any) {
+        throw new Error(`Backend export polling failed: ${err.message}`);
+      }
+
+      if (exportStatus === 'failed') {
+        throw new Error(`Backend export processing failed: ${finalExport.error_message || 'Unknown error'}`);
+      }
+
+      try {
+        if (type === 'srt') {
+          const srtUrl = finalExport.download_url;
+          if (!srtUrl) throw new Error('Missing SRT download URL from backend');
+          const contentRes = await fetch(srtUrl);
+          const srtContent = await contentRes.text();
+          await importSrtAsCaptionTrack(srtContent);
+        } else if (type === 'burn_in_render') {
+          const payload = await kalakarApi.getExportPayload(finalExport.id);
+          await insertRenderedCaptionsToTimeline(payload);
+        }
+      } catch (premiereErr: any) {
+        throw new Error(`Premiere Pro error: ${premiereErr.message}`);
+      }
+
       setIsExportModalOpen(false);
     },
-    [captions, styleSettings, appliedTemplateId],
+    [currentJobId]
   );
 
   const checkBackendHealth = useCallback(async () => {
@@ -130,9 +178,28 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
       const res = await kalakarApi.checkHealth();
       const online = res.status === 'ok';
       setIsBackendOnline(online);
+      
+      if (online) {
+        try {
+          const fetched = await kalakarApi.listTemplates();
+          setTemplates(
+            fetched.map(t => ({
+              id: t.id,
+              name: t.name,
+              category: 'Branded',
+              previewColor: t.font_color || '#ffffff'
+            }))
+          );
+        } catch (e) {
+          console.warn('Failed to fetch templates:', e);
+        }
+      } else {
+        setTemplates(MOCK_TEMPLATES);
+      }
       return online;
     } catch {
       setIsBackendOnline(false);
+      setTemplates(MOCK_TEMPLATES);
       return false;
     }
   }, []);
@@ -172,6 +239,9 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
       isExportModalOpen,
       setIsExportModalOpen,
       handleExport,
+      currentJobId,
+      setCurrentJobId,
+      templates,
     }),
     [
       activeTab,
@@ -193,6 +263,8 @@ export function CaptionProvider({ children }: { children: ReactNode }) {
       checkBackendHealth,
       isExportModalOpen,
       handleExport,
+      currentJobId,
+      templates,
     ],
   );
 

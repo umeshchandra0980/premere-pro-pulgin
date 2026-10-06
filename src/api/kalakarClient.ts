@@ -67,6 +67,31 @@ export interface BackendProject {
   created_at: string;
 }
 
+export type JobStatus = 'queued' | 'processing' | 'done' | 'failed';
+
+export interface JobResponse {
+  id: string;
+  project_id: string;
+  media_file_id?: string;
+  status: JobStatus;
+  language: string;
+  error_message?: string;
+}
+
+export interface JobStatusResponse {
+  id: string;
+  status: JobStatus;
+  error_message?: string;
+}
+
+export interface MediaFileResponse {
+  id: string;
+  project_id: string;
+  original_filename: string;
+  s3_key: string;
+  upload_status: string;
+}
+
 const STORAGE_KEY_URL = 'kalakar_backend_url';
 const STORAGE_KEY_KEY = 'kalakar_api_key';
 export const RENDER_BACKEND_URL = 'https://plug-backend-jsfa.onrender.com';
@@ -230,6 +255,30 @@ class KalakarApiClient {
     return res.ok;
   }
 
+  public async updateWord(
+    jobId: string,
+    wordId: string,
+    patch: { word_text?: string; start_time?: number; end_time?: number }
+  ): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/v1/jobs/${jobId}/captions/words/${wordId}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) throw new Error('Failed to update word');
+    return res.json();
+  }
+
+  public async resegment(jobId: string, params: { max_words_per_segment?: number; max_duration_seconds?: number }): Promise<BackendCaptionsResponse> {
+    const res = await fetch(`${this.baseUrl}/v1/jobs/${jobId}/captions/resegment`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(params),
+    });
+    if (!res.ok) throw new Error('Failed to resegment');
+    return res.json();
+  }
+
   /** Fetch style templates */
   public async listTemplates(): Promise<BackendTemplate[]> {
     const res = await fetch(`${this.baseUrl}/v1/templates`, {
@@ -240,16 +289,79 @@ class KalakarApiClient {
   }
 
   /** Trigger Export (SRT or template JSON) */
-  public async createExport(jobId: string, exportType: 'srt' | 'template_json'): Promise<any> {
+  public async createExport(jobId: string, exportType: 'srt' | 'burn_in_render', templateId?: string): Promise<any> {
+    const body: Record<string, any> = { export_type: exportType };
+    if (templateId) {
+      body.template_id = templateId;
+    }
     const res = await fetch(`${this.baseUrl}/v1/jobs/${jobId}/exports`, {
       method: 'POST',
       headers: this.getHeaders(),
-      body: JSON.stringify({ export_type: exportType }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Export failed: ${text}`);
     }
+    return res.json();
+  }
+
+  public async getExport(exportId: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/v1/exports/${exportId}`, {
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to get export status');
+    return res.json();
+  }
+
+  public async getExportPayload(exportId: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/v1/exports/${exportId}/payload`, {
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to get export payload');
+    return res.json();
+  }
+  public async createProject(name: string): Promise<BackendProject> {
+    const res = await fetch(`${this.baseUrl}/v1/projects`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error('Failed to create project');
+    return res.json();
+  }
+
+  public async uploadMedia(projectId: string, file: File | Blob, filename: string): Promise<MediaFileResponse> {
+    const headers = this.getHeaders();
+    if ('Content-Type' in headers) delete (headers as Record<string, string>)['Content-Type'];
+    
+    const formData = new FormData();
+    formData.append('file', file, filename);
+
+    const res = await fetch(`${this.baseUrl}/v1/projects/${projectId}/media`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (!res.ok) throw new Error('Failed to upload media');
+    return res.json();
+  }
+
+  public async createJob(mediaFileId: string, language: string): Promise<JobResponse> {
+    const res = await fetch(`${this.baseUrl}/v1/jobs`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ media_file_id: mediaFileId, language }),
+    });
+    if (!res.ok) throw new Error('Failed to create job');
+    return res.json();
+  }
+
+  public async getJobStatus(jobId: string): Promise<JobStatusResponse> {
+    const res = await fetch(`${this.baseUrl}/v1/jobs/${jobId}/status`, {
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to get job status');
     return res.json();
   }
 }

@@ -12,12 +12,14 @@ export interface CaptionLineProps {
   caption: Caption;
   currentPlaybackTime: number;
   onDelete: (id: string) => void;
+  jobId: string | null;
 }
 
 export function CaptionLine({
   caption,
   currentPlaybackTime,
   onDelete,
+  jobId,
 }: CaptionLineProps) {
   return (
     <div className={styles.line}>
@@ -49,8 +51,9 @@ export function CaptionLine({
           return (
             <WordChip
               key={`${caption.id}-w-${i}`}
-              text={word.text}
+              word={word}
               isActive={isActive}
+              jobId={jobId}
             />
           );
         })}
